@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPWeb - Konfiguration</title>
+    <link rel="icon" type="image/png" href="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/microsoft-powerpoint-icon.png">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 5px 0;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Align items vertically */
+            transition: all 0.2s ease;
+            height: 18px;
+        }
+        header nav {
+            display: flex;
+            justify-content: center;
+            text-align: center;
+            flex-grow: 1; /* Ensures the nav is centered */
+            transform: translateX(-2%); /* This ensures it's centered on the screen */
+        }
+        header nav a {
+            margin: 0 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: fixed;
+            transition: all 0.2s ease;
+            display: inline-block; /* Needed for proper transform scaling */
+        }
+
+        header nav a:hover {
+        font-size: 18px;
+        color: grey;
+        margin: 0 22px;
+        }
+        #name {
+            text-align: left;
+            padding-left: 20px;
+        }
+        #version {
+            padding-left: 2px;
+            font-size: 10px;
+
+        }
+        #logout {
+            padding-right: 20px;
+            font-size: 16px;
+            text-align: right;
+            color: white;
+            text-decoration: none;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            padding: 40px;
+            text-align: center;
+        }
+        form {
+            margin: 20px 0;
+        }
+        input[type="file"] {
+            font-size: 16px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div id="name">PPWeb</div>
+        <div id="version">v{{ version }}</div>
+        <nav>
+            <a href="/control">Steuerung</a>
+            <a href="/config">Konfiguration</a>
+            <a href="/system">System</a>
+        </nav>
+        <a href="/logout" id="logout">Logout</a>
+    </header>
+
+    <h1>{{ name }} - Konfiguration</h1>
+
+    <div class="container">
+        <form method="POST" action="/upload" enctype="multipart/form-data" id="upload">
+            <label for="file">Wählen Sie eine PowerPoint-Datei (.pptx):</label><br>
+            <input type="file" name="file" id="file" accept=".pptx" required><br><br>
+            <button type="submit" name="restart" value="true">Hochladen und Präsentation Neustarten</button>
+
+            <button type="submit" name="restart" value="false">Hochladen und Präsentation Stoppen</button>
+        </form>
+
+        <div id="other">
+            <h2>Weitere Optionen</h2>
+            <button onclick="window.location.href='/download'">Herunterladen</button>
+        </div>
+    </div>
+
+</body>
+</html>

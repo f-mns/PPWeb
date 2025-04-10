@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPWeb - Steuerung</title>
+    <link rel="icon" type="image/png" href="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/microsoft-powerpoint-icon.png">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 5px 0;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Align items vertically */
+            transition: all 0.2s ease;
+            height: 18px;
+        }
+        header nav {
+            display: flex;
+            justify-content: center;
+            text-align: center;
+            flex-grow: 1; /* Ensures the nav is centered */
+            transform: translateX(-2%); /* This ensures it's centered on the screen */
+        }
+        header nav a {
+            margin: 0 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: fixed;
+            transition: all 0.2s ease;
+            display: inline-block; /* Needed for proper transform scaling */
+        }
+
+        header nav a:hover {
+        font-size: 18px;
+        color: grey;
+        margin: 0 22px;
+        }
+        #name {
+            text-align: left;
+            padding-left: 20px;
+        }
+        #version {
+            padding-left: 2px;
+            font-size: 10px;
+
+        }
+        #logout {
+            padding-right: 20px;
+            font-size: 16px;
+            text-align: right;
+            color: white;
+            text-decoration: none;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+        h3 {
+            padding-top: 10px;
+        }
+        img {
+            width: 60%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .button-group form {
+            display: inline-block;
+            margin: 5px;
+        }
+        .button-group input {
+            padding: 15px 15px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .button-group input[disabled] {
+            background: #CCC;
+        }
+        .button-group input:hover {
+            background-color: #45a049;
+            transition: all 0.2s ease;
+        }
+        .button-group input:hover[disabled] {
+            background: #CCCC;
+        }
+        .slide-info {
+            margin-top: 20px;
+            font-size: 23px;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div id="name">PPWeb</div>
+        <div id="version">v{{ version }}</div>
+        <nav>
+            <a href="/control">Steuerung</a>
+            <a href="/config">Konfiguration</a>
+            <a href="/system">System</a>
+        </nav>
+        <a href="/logout" id="logout">Logout</a>
+    </header>
+
+    <h1>{{ name }} - Steuerung</h1>
+
+    <div class="container">
+        <img id="screenshot" src="/screen" alt="Screenshot">
+
+        <div class="slide-info">
+            <p>Aktuelle Folie: <span id="current-slide">0</span> / <span id="total-slides">0</span></p>
+        </div>
+        <div class="button-group" >
+            <form action="/return"><input type="submit" disabled value="◁  Zurück" /></form>
+            <form action="/skip"><input type="submit" disabled value="Nächste ▷" /></form>
+            <form action="/start"><input type="submit" disabled value="▶ Start" /></form>
+            <form action="/end"><input type="submit" disabled value="◼ Beenden" /></form>
+            <form action="/restart"><input type="submit" disabled value="↺ Neustart" /></form>
+        </div>
+        <a class="Loading">Loading...</a>
+    </div>
+
+    <script>
+
+        // Update Buttons
+        function updateStatus() {
+            fetch("/status")
+                .then(response => response.json())
+                .then(data => {
+                    const running = data.running;
+
+                    // Toggle disabled state
+                    document.querySelectorAll("form[action='/return'] input, form[action='/skip'] input, form[action='/end'] input, form[action='/restart'] input")
+                        .forEach(btn => btn.disabled = !running);
+
+                    document.querySelectorAll("form[action='/start'] input")
+                        .forEach(btn => btn.disabled = running);
+
+                    document.querySelectorAll(".Loading").forEach(el => el.style.display = "none");
+                })
+                .catch(error => console.error("Error fetching status:", error));
+        }
+
+        // Update Live-Picture
+        function updateScreenshotAndSlideInfo() {
+            var screenshot = document.getElementById("screenshot");
+            var timestamp = new Date().getTime(); // Add timestamp to prevent caching
+            screenshot.src = "/screen?" + timestamp; // Update the image with a new timestamp
+
+            fetch("/slide_info")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.total_slides && data.current_slide) {
+                        document.getElementById("total-slides").textContent = data.total_slides;
+                        document.getElementById("current-slide").textContent = data.current_slide;
+                    }
+                })
+                .catch(error => console.error("Error fetching slide info:", error));
+        }
+
+        // Run both functions immediately on page load
+        updateStatus();
+        updateScreenshotAndSlideInfo();
+
+        // Continue running every 3 seconds
+        setInterval(updateStatus, 3000);
+        setInterval(updateScreenshotAndSlideInfo, 3000);
+
+    </script>
+
+</body>
+</html>

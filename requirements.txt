@@ -1,0 +1,8 @@
+pyautogui
+flask
+pywin32
+json
+os
+functools
+threading
+tkinter

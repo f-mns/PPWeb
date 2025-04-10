@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPWeb - Systemkonfiguation</title>
+    <link rel="icon" type="image/png" href="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/microsoft-powerpoint-icon.png">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 5px 0;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Align items vertically */
+            transition: all 0.2s ease;
+            height: 18px;
+        }
+        header nav {
+            display: flex;
+            justify-content: center;
+            text-align: center;
+            flex-grow: 1; /* Ensures the nav is centered */
+            transform: translateX(-2%); /* This ensures it's centered on the screen */
+        }
+        header nav a {
+            margin: 0 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: fixed;
+            transition: all 0.2s ease;
+            display: inline-block; /* Needed for proper transform scaling */
+        }
+
+        header nav a:hover {
+        font-size: 18px;
+        color: grey;
+        margin: 0 22px;
+        }
+        #name {
+            text-align: left;
+            padding-left: 20px;
+        }
+        #version {
+            padding-left: 2px;
+            font-size: 10px;
+
+        }
+        #logout {
+            padding-right: 20px;
+            font-size: 16px;
+            text-align: right;
+            color: white;
+            text-decoration: none;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            padding: 40px;
+            text-align: center;
+        }
+        input[type="submit"], button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #ff4c4c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 30px;
+        }
+        input[type="submit"]:hover, button:hover {
+            background-color: #e43b3b;
+            transform: scale(1.1);
+        }
+        .input-field {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            width: 250px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .notification {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .notification.error {
+            color: red;
+        }
+        .notification.success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div id="name">PPWeb</div>
+        <div id="version">v{{ version }}</div>
+        <nav>
+            <a href="/control">Steuerung</a>
+            <a href="/config">Konfiguration</a>
+            <a href="/system">System</a>
+        </nav>
+        <a href="/logout" id="logout">Logout</a>
+    </header>
+
+    <h1>{{ name }} - Systemsteuerung</h1>
+
+    <div class="container">
+        <h1>Systemsteuerung</h1>
+        <form action="/shutdown">
+            <input type="submit" value="Herunterfahren" />
+        </form>
+        <form action="/reboot">
+            <input type="submit" value="Neustarten" />
+        </form>
+        <hr>
+
+        <h1>Passwort ändern</h1>
+        <form id="passwordChangeForm" method="POST" action="/change-password">
+            <label>Altes Passwort:</label><br>
+            <input type="password" name="OLD_PASSWORD" id="OLD_PASSWORD" class="input-field" required><br><br>
+
+            <label>Neues Passwort:</label><br>
+            <input type="password" name="NEW_PASSWORD" id="NEW_PASSWORD" class="input-field" required><br><br>
+
+            <label>Neues Passwort Bestätigen:</label><br>
+            <input type="password" name="CONFIRM_NEW_PASSWORD" id="CONFIRM_NEW_PASSWORD" class="input-field" required><br><br>
+
+            <input type="submit" value="Passwort ändern">
+        </form>
+
+        <div id="passwordMessage" class="notification"></div>
+
+        <hr>
+        <h1>Admin-Config</h1>
+        <form id="configForm" method="POST" action="/pushconfig">
+            <label>HOST:</label><br>
+            <input type="text" name="HOST" value="{{ config['HOST'] }}" class="input-field"><br><br>
+
+            <label>PORT:</label><br>
+            <input type="number" name="PORT" value="{{ config['PORT'] }}" class="input-field"><br><br>
+
+            <label>Debug Mode:</label>
+            <input type="checkbox" name="DEBUG_MODE" {% if config['DEBUG_MODE'] %}checked{% endif %}><br><br>
+
+            <label>Instanzname:</label><br>
+            <input type="text" name="INSTANCE_NAME" value="{{ config['INSTANCE_NAME'] }}" class="input-field"><br><br>
+
+            <label>View-Only deaktivieren:</label><br>
+            <input type="checkbox" name="VIEW_ONLY_hidden" value="true" {% if config['VIEW_ONLY']['hidden'] %}checked{% endif %} class="input-field"><br><br>
+
+            <label>View-Only download erlauben:</label><br>
+            <input type="checkbox" name="VIEW_ONLY_download" value="true" {% if config['VIEW_ONLY']['download'] %}checked{% endif %} class="input-field"><br><br>
+
+
+            <label>Admin Passwort:</label><br>
+            <input type="password" name="CURRENT_PASSWORD" id="CURRENT_PASSWORD" class="input-field" required><br><br>
+
+            <input type="submit" value="Speichern" onclick="return validatePassword()">
+            <div id="passwordConfigMessage" class="notification"></div>
+        </form>
+    </div>
+
+<script>
+    function validatePassword() {
+        var currentPassword = document.getElementById("CURRENT_PASSWORD").value;
+        var adminPassword = "{{ config['ADMIN_PASSWORD'] }}"; // Password from the config
+        var userPassword = "{{ config['LOGIN_PASSWORD'] }}"; // Password from the config
+
+        if (currentPassword !== adminPassword) {
+            if (currentPassword == userPassword) {
+                document.getElementById("passwordConfigMessage").textContent = "Bitte gebe das Admin-Passwort und nicht das Login-Passwort ein.";
+                return false;
+            }
+            document.getElementById("passwordConfigMessage").textContent = "Das Passwort ist falsch. Bitte versuche es erneut.";
+            document.getElementById("passwordConfigMessage").className = "notification error";
+            return false;
+        }
+
+        return true;
+    }
+
+    document.getElementById("passwordChangeForm").onsubmit = function (event) {
+        event.preventDefault();
+
+        var oldPassword = document.getElementById("OLD_PASSWORD").value;
+        var newPassword = document.getElementById("NEW_PASSWORD").value;
+        var confirmNewPassword = document.getElementById("CONFIRM_NEW_PASSWORD").value;
+
+        if (newPassword !== confirmNewPassword) {
+            document.getElementById("passwordMessage").textContent = "Die neuen Passwörter stimmen nicht überein.";
+            document.getElementById("passwordMessage").className = "notification error";
+            return;
+        }
+
+        var correctOldPassword = "{{ config['LOGIN_PASSWORD'] }}"; // Assuming this is the old password from config
+        if (oldPassword !== correctOldPassword) {
+            document.getElementById("passwordMessage").textContent = "Das alte Passwort ist falsch.";
+            document.getElementById("passwordMessage").className = "notification error";
+            return;
+        }
+
+        document.getElementById("passwordMessage").textContent = "Passwort erfolgreich geändert!";
+        document.getElementById("passwordMessage").className = "notification success";
+
+        document.getElementById("passwordChangeForm").submit();  // Trigger form submission
+    };
+</script>
+
+</body>
+</html>

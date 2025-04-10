@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPWeb - VierOnly</title>
+    <link rel="icon" type="image/png" href="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/microsoft-powerpoint-icon.png">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 5px 0;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Align items vertically */
+            transition: all 0.2s ease;
+            height: 18px;
+        }
+        header nav {
+            display: flex;
+            justify-content: center;
+            text-align: center;
+            flex-grow: 1; /* Ensures the nav is centered */
+            transform: translateX(-6%); /* This ensures it's centered on the screen */
+        }
+        header nav a {
+            margin: 0 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: fixed;
+            transition: all 0.2s ease;
+            display: inline-block; /* Needed for proper transform scaling */
+        }
+
+        header nav a:hover {
+        font-size: 18px;
+        color: grey;
+        margin: 0 22px;
+        }
+        #name {
+            text-align: left;
+            padding-left: 20px;
+        }
+        #logout {
+            text-align: right;
+            padding-right: 20px;
+        }
+        #version {
+            padding-left: 2px;
+            font-size: 10px;
+
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+        h3 {
+            padding-top: 10px;
+        }
+        img {
+            width: 60%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        #box {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .button-group form {
+            display: inline-block;
+            margin: 5px;
+        }
+        button {
+            padding: 15px 15px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .button-group input:hover {
+            background-color: #45a049;
+            transition: all 0.2s ease;
+        }
+        .slide-info {
+            margin-top: 20px;
+            font-size: 23px;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div id="name">PPWeb</div>
+        <div id="version">v1.0.0</div>
+        <nav></nav>
+        <div id="logout" onclick="window.location.href='/login'">Login</div>
+    </header>
+
+    <h1>FZJ Seecasino - View-Only</h1>
+
+    <div class="container">
+        <img id="screenshot" src="/screen" alt="Screenshot">
+        <div class="slide-info">
+            <p>Aktuelle Folie: <span id="current-slide">0</span> / <span id="total-slides">0</span></p>
+        </div>
+      <button onclick="window.location.href='/download'">Herunterladen</button>
+    </div>
+
+    <script>
+        // Refresh the screenshot every 3 seconds
+        setInterval(function() {
+            var screenshot = document.getElementById("screenshot");
+            var timestamp = new Date().getTime(); // Add timestamp to prevent caching
+            screenshot.src = "/screen?" + timestamp; // Update the image with a new timestamp
+
+            // Fetch slide information
+            fetch("/slide_info")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.total_slides && data.current_slide) {
+                        document.getElementById("total-slides").textContent = data.total_slides;
+                        document.getElementById("current-slide").textContent = data.current_slide;
+                    }
+                })
+                .catch(error => console.error("Error fetching slide info:", error));
+        }, 3000);
+    </script>
+
+</body>
+</html>
